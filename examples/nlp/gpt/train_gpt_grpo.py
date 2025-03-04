@@ -105,6 +105,7 @@ def main(cfg) -> None:
             cfg.model.data.data_prefix[split][0],
             ptl_model.tokenizer,
             cfg.model.data.apply_chat_template,
+            cfg.model.data.get('chat_prompt_tokens', None),
             cfg.model.data.system_prompt_file,
             cfg.model.data.prompt_file,
             seq_length=cfg.model.data.seq_length,
