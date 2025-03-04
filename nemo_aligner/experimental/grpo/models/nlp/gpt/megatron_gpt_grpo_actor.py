@@ -520,7 +520,10 @@ class MegatronGPTActorModel(NLPAdapterModelMixin, MegatronGPTModel, AlignableGen
                     format_dict = SafeDict(l=local_layer, gl=global_layer)
                     
                     # Use the conversion dict to get the appropriate recipe for this parameter.
-                    formatted_mapping = {k.format_map(format_dict): rec for k, rec in CONVERTER.mcore_te_to_hf_llama.items()}
+                    if self.cfg.grpo.inference_backend.converter_type not in CONVERTER.CHECKPOINT_MAPPINGS:
+                        raise KeyError(f"Unsupported converter_type={self.cfg.grpo.inference_backend.converter_type}. Please select an option in {list(CONVERTER.CHECKPOINT_MAPPINGS.keys())}")
+                    formatted_mapping = {k.format_map(format_dict): rec for k, rec in CONVERTER.CHECKPOINT_MAPPINGS[self.cfg.grpo.inference_backend.converter_type].items()}
+
                     recipe = formatted_mapping.get(owner_raw_key, None)
                     if recipe is None:
                         print(f"WARNING: {owner_raw_key} has no recipe mapping for conversion", flush=True)
