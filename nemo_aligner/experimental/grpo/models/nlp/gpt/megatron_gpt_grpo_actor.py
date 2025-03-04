@@ -30,6 +30,7 @@ from safetensors.torch import save_file
 from huggingface_hub import snapshot_download
 
 from nemo.collections.nlp.models.language_modeling.megatron_gpt_model import MegatronGPTModel
+from nemo.collections.nlp.models.language_modeling.megatron_mamba_model import MegatronMambaModel
 from nemo.collections.nlp.modules.common.megatron.utils import (
     average_losses_across_data_parallel_group,
     get_iterator_k_split,
@@ -73,7 +74,8 @@ from nemo_aligner.experimental.grpo.models.nlp.gpt import conversion_dict as CON
 
 from tensor_comms.shared_tensors import SharedCPUMemoryTensorDict
 
-class MegatronGPTActorModel(NLPAdapterModelMixin, MegatronGPTModel, AlignableGenerativeInterface):
+
+class MegatronActorMixin(NLPAdapterModelMixin, MegatronGPTModel, AlignableGenerativeInterface):
     def __init__(self, cfg: DictConfig, trainer: Trainer):
         super().__init__(cfg, trainer=trainer)
         self.automatic_optimization = False
@@ -805,3 +807,12 @@ class MegatronGPTActorModel(NLPAdapterModelMixin, MegatronGPTModel, AlignableGen
         position_ids = position_ids.expand(tokens.size(0), -1)
 
         return attention_mask, loss_mask, position_ids
+
+
+class MegatronGPTActorModel(MegatronActorMixin, NLPAdapterModelMixin, MegatronGPTModel, AlignableGenerativeInterface):
+    ...
+
+
+class MegatronMambaActorModel(MegatronActorMixin, NLPAdapterModelMixin, MegatronMambaModel, AlignableGenerativeInterface):
+    ...
+
