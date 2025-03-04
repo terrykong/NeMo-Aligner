@@ -463,7 +463,7 @@ class MegatronActorMixin(NLPAdapterModelMixin, MegatronGPTModel, AlignableGenera
                 source_hf_jsons_dir = self.cfg.hf_model_name_or_configs_dir
             else:
                 # Otherwise, treat it as a HuggingFace model name and download all .json files from the repo.
-                source_hf_jsons_dir = snapshot_download(self.cfg.hf_model_name_or_configs_dir, allow_patterns=["*.json"], ignore_patterns=["*.index.json"])
+                source_hf_jsons_dir = snapshot_download(self.cfg.hf_model_name_or_configs_dir, allow_patterns=["*.json", "*.py"], ignore_patterns=["*.index.json"])
         # os.chmod(out_dir, 0o777)
         class SafeDict(dict):
             def __missing__(self, key):
@@ -605,7 +605,8 @@ class MegatronActorMixin(NLPAdapterModelMixin, MegatronGPTModel, AlignableGenera
                 try:
                     os.makedirs(out_dir, exist_ok=True, mode=0o777)
                     for file in os.listdir(source_hf_jsons_dir):
-                        if file.endswith('.json') and not file.endswith('.index.json'):
+                        if (file.endswith('.json') and not file.endswith('.index.json')) or \
+                            file.endswith('.py'):
                             src = os.path.join(source_hf_jsons_dir, file)
                             dst = os.path.join(out_dir, file)
                             shutil.copy(src, dst)
