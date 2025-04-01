@@ -317,9 +317,16 @@ def surpress_user_warnings(f):
 def masked_mean(values, mask, dim=None):
     """
     Masks values with mask, and computes the mean of the values using the masked values.
+
     """
     if dim is None:
-        return values[mask.bool()].mean()
+        assert values.dim() == 2, "values must be 2D tensor, [batch_size, seq_len]"
+        assert mask.dim() == 2, "mask must be 2D tensor, [batch_size, seq_len]"
+
+        seq_lens = mask.sum(dim=1)
+        total_values = (values * mask).sum(dim=1)
+        return torch.nanmean(total_values / seq_lens)
+
     return as_masked_tensor(values, mask.bool()).mean(dim=dim).to_tensor(torch.nan)
 
 
